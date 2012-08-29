@@ -7,7 +7,7 @@
 # Last updated: 28/08/2012
 ##
 
-COMMANDS="awk cat date grep hostname logger mail mysql"
+COMMANDS="awk cat cut date grep head hostname ifconfig logger mail mysql tail"
 
 export PATH='/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin'
 
@@ -21,22 +21,24 @@ done
 # Define variables
 HOST=127.0.0.1
 PORT=3307
-EMAIL="username@domain.com"
+EMAILS="username@domain.com,username2@domain.com"
 
-USERNAME=MYSQLUSER
-PASSWORD=MYSQLUSERPASSWORD
-SOCKET=
+MYUSERNAME=MYSQLUSER
+MYPASSWORD=MYSQLUSERPASSWORD
+MYSOCKET=
+MYSQLLOG=/var/log/mysqld1.log
 
 TIMESTAMP=$($DATE "+%e-%m-%Y %R:%S")
+EXTIP=`$IFCONFIG eth0 | $HEAD -n2 | $TAIL -n1 | $CUT -d' ' -f12 | $CUT -c 6-`
 
 ## Are we using Sockets or ports?
 if [[ $SOCKET ]]
 then
 	LOCATION="-S $SOCKET"
-	LOCATIONMSG="$SOCKET on `$HOSTNAME -s`"
+	LOCATIONMSG="$SOCKET on `$HOSTNAME -s`[$EXTIP]"
 else
 	LOCATION="-h $HOST -P $PORT"
-	LOCATIONMSG="$PORT on `$HOSTNAME -s`"
+	LOCATIONMSG="$PORT on `$HOSTNAME -s`[$EXTIP]"
 fi
 
 # Define Functions
@@ -56,10 +58,11 @@ function SLAVE()
 
 ## Mail Alert
 function MAILALERT() {
-        BODY="MySQL Slave $LOCATIONMSG has stopped replicating on $TIMESTAMP.\n\nLast_Error: $ERROR"
+        ERRORLOG=`$CAT $MYSQLLOG | $GREP "\[ERROR\] Slave SQL:" | $TAIL -1`
+        BODY="MySQL Slave $LOCATIONMSG has stopped replicating on $TIMESTAMP.\n\nLast_Error: $ERROR.\n\nFrom $MYSQLLOG:\n\n$ERRORLOG"
         SUBJECT="ERROR: Slave $LOCATIONMSG has stopped replicating!"
 
-        echo -e $BODY | $MAIL -s "$SUBJECT" $EMAIL
+        echo -e $BODY | $MAIL -s "$SUBJECT" $EMAILS
 }
 
 ## Skip errors
