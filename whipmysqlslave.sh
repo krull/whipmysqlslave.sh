@@ -4,7 +4,7 @@
 #
 # */1 * * * * /root/scripts/whipmysqlslave.sh > /dev/null 2>&1
 #
-# Last updated: 28/08/2012
+# Last updated: 29/08/2012
 ##
 
 COMMANDS="awk cat cut date grep head hostname ifconfig logger mail mysql tail"
@@ -26,7 +26,7 @@ EMAILS="username@domain.com,username2@domain.com"
 MYUSERNAME=MYSQLUSER
 MYPASSWORD=MYSQLUSERPASSWORD
 MYSOCKET=
-MYSQLLOG=/var/log/mysqld1.log
+MYSQLLOG=/PATH/TO/mysqld.log
 
 TIMESTAMP=$($DATE "+%e-%m-%Y %R:%S")
 EXTIP=`$IFCONFIG eth0 | $HEAD -n2 | $TAIL -n1 | $CUT -d' ' -f12 | $CUT -c 6-`
