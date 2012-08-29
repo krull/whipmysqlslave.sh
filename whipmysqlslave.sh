@@ -32,10 +32,10 @@ TIMESTAMP=$($DATE "+%e-%m-%Y %R:%S")
 EXTIP=`$IFCONFIG eth0 | $HEAD -n2 | $TAIL -n1 | $CUT -d' ' -f12 | $CUT -c 6-`
 
 ## Are we using Sockets or ports?
-if [[ $SOCKET ]]
+if [[ $MYSOCKET ]]
 then
-	LOCATION="-S $SOCKET"
-	LOCATIONMSG="$SOCKET on `$HOSTNAME -s`[$EXTIP]"
+	LOCATION="-S $MYSOCKET"
+	LOCATIONMSG="$MYSOCKET on `$HOSTNAME -s`[$EXTIP]"
 else
 	LOCATION="-h $HOST -P $PORT"
 	LOCATIONMSG="$PORT on `$HOSTNAME -s`[$EXTIP]"
@@ -45,12 +45,12 @@ fi
 ## Obtain MySQL slave server status
 function SLAVE()
 {
-        STATUS=`$MYSQL $LOCATION -u $USERNAME -p$PASSWORD -e \
+        STATUS=`$MYSQL $LOCATION -u $MYUSERNAME -p$MYPASSWORD -e \
                 "SHOW SLAVE STATUS \G" |
                 $GREP Seconds_Behind_Master |
                 $AWK '{print $2}'`
 
-        ERROR=`$MYSQL $LOCATION -u $USERNAME -p$PASSWORD -e \
+        ERROR=`$MYSQL $LOCATION -u $MYUSERNAME -p$MYPASSWORD -e \
                 "SHOW SLAVE STATUS \G" |
                 $GREP Last_Error |
                 $AWK -F \: '{print $2}'`
@@ -68,7 +68,7 @@ function MAILALERT() {
 ## Skip errors
 function UNSTICK()
 {
-        $MYSQL $LOCATION -u $USERNAME -p$PASSWORD -e \
+        $MYSQL $LOCATION -u $MYUSERNAME -p$MYPASSWORD -e \
                 "STOP SLAVE; SET GLOBAL SQL_SLAVE_SKIP_COUNTER = 1; START SLAVE;"
         sleep 5
         # Check everything again
@@ -96,7 +96,7 @@ function CHECK()
 ## Are we running?
 function ALIVE()
 {
-        UP=`$MYSQL $LOCATION -u $USERNAME -p$PASSWORD -e \
+        UP=`$MYSQL $LOCATION -u $MYUSERNAME -p$MYPASSWORD -e \
                 "SHOW SLAVE STATUS \G" |
                 $GREP Slave_IO_Running |
                 $AWK '{print $2}'`
