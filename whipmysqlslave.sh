@@ -59,7 +59,7 @@ function SLAVE()
 ## Mail Alert
 function MAILALERT() {
         ERRORLOG=`$CAT $MYSQLLOG | $GREP "\[ERROR\] Slave SQL:" | $TAIL -1`
-        BODY="MySQL Slave $LOCATIONMSG has stopped replicating on $TIMESTAMP.\n\nLast_Error: $ERROR.\n\nFrom $MYSQLLOG:\n\n$ERRORLOG"
+        BODY="MySQL Slave $LOCATIONMSG has stopped replicating on $TIMESTAMP. Last_Error: $ERROR.\n\n\n\n$MYSQLLOG: $ERRORLOG"
         SUBJECT="[MySQL][ERROR]: Slave $LOCATIONMSG has stopped replicating!"
 
         echo -e $BODY | $MAIL -s "$SUBJECT" $EMAILS
