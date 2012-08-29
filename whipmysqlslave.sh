@@ -60,7 +60,7 @@ function SLAVE()
 function MAILALERT() {
         ERRORLOG=`$CAT $MYSQLLOG | $GREP "\[ERROR\] Slave SQL:" | $TAIL -1`
         BODY="MySQL Slave $LOCATIONMSG has stopped replicating on $TIMESTAMP.\n\nLast_Error: $ERROR.\n\nFrom $MYSQLLOG:\n\n$ERRORLOG"
-        SUBJECT="ERROR: Slave $LOCATIONMSG has stopped replicating!"
+        SUBJECT="[MySQL][ERROR]: Slave $LOCATIONMSG has stopped replicating!"
 
         echo -e $BODY | $MAIL -s "$SUBJECT" $EMAILS
 }
@@ -83,9 +83,9 @@ function CHECK()
         if [ $STATUS = NULL ]
         then
                 # I think the replicator is broken
-                echo "MySQL Slave $LOCATIONMSG replication broken! Last_Error: $ERROR" | $LOGGER
+                echo "[ERROR] MySQL Slave $LOCATIONMSG replication broken! Last_Error: $ERROR" | $LOGGER
                 MAILALERT
-                echo "MySQL Slave $LOCATIONMSG is not replicating! Fixing..." | $LOGGER
+                echo "[ERROR] MySQL Slave $LOCATIONMSG is not replicating! Fixing..." | $LOGGER
                 UNSTICK
         else
                 # Everything should be fine
